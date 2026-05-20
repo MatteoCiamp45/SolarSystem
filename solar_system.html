@@ -126,7 +126,7 @@
       }
 
     
-      // Luce ambientale
+      // 1) Luce ambientale
       vec3 color = 0.05 * baseColor;
 
       /* Contributo di tutti i campioni sulla superficie */
@@ -140,7 +140,7 @@
 
         /* Diffuse */
         float diff = max(dot(normal, lightDir), 0.0);                           // fattore di diffusione (0 se luce dietro la superficie)
-        color += diff * baseColor * atten / float(NUM_SAMPLES);                 // contributo del campione
+        color += diff * baseColor * atten / float(NUM_SAMPLES);                 // 2) contributo luce diffusa
 
       }
 
@@ -173,6 +173,7 @@
         );
       }
 
+      // 3) contributo luce speculare
       color += spec * specMask * specIntensity;
 
       gl_FragColor = vec4(color, 1.0);

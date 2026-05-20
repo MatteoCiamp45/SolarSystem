@@ -68,7 +68,7 @@ var settings = new function () {
 };
 
 /******************** DISTRIBUZIONE DI FIBONACCI sulla sfera
-   Distribuisco in modo uniforme i campioni di luce sulla superficie de sole
+   Distribuisco in modo uniforme i campioni di luce sulla superficie del sole
    in modo da ottenere un'illuminazione più realistica. Le ombre ottenute saranno più morbide e dettagliate.
 */
 function fibonacciSpherePoints(n, r) {

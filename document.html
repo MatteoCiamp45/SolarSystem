@@ -1,0 +1,147 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SOLAR SYSTEM WebGL</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      line-height: 1.6;
+      background: #0b0f1a;
+      color: #e8e8e8;
+    }
+
+    h1 {
+      font-size: 34px;
+      color: #7dd3fc;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #1f2a44;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #a5b4fc;
+      margin-top: 35px;
+      margin-bottom: 12px;
+      border-left: 4px solid #3b82f6;
+      padding-left: 10px;
+    }
+
+    .section {
+      background: #111827;
+      padding: 18px 20px;
+      border-radius: 10px;
+      border: 1px solid #1f2a44;
+      margin-bottom: 18px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+<h1>SOLAR SYSTEM WebGL</h1>
+
+<h2>PANORAMICA</h2>
+<div class="section">
+
+Il progetto è una simulazione interattiva del sistema solare realizzata in WebGL 1.0 e JavaScript puro. Il codice sorgente è organizzato in quattro file: config.js, camera.js, load2_mesh.js e main.js. Il file HTML principale, solar_system.html, ospita gli shader GLSL come script inline e il canvas WebGL su cui avviene il rendering, mentre tramite menu.html è possibile accedere alle funzionalità interattive sviluppate.
+
+</div>
+
+<h2>PIPELINE DI RENDERING</h2>
+<div class="section">
+
+<h3>1. CONFIGURAZIONE</h3>
+
+All'avvio della pagina, il browser esegue prima config.js, che definisce i parametri orbitali di tutti i pianeti (raggio, velocità angolare, inclinazione del piano orbitale), la geometria del cubo skybox e i 16 punti campione distribuiti sulla superficie solare con la distribuzione di Fibonacci, usati in seguito per simulare un'area light.
+
+L’utilizzo del metodo di Fibonacci nasce dalla necessità di distribuire punti sulla superficie di una sfera nel modo più uniforme possibile in modo da ottenere un'illuminazione sui pianeti non proveniente da un'unica sorgente puntiforme centrata nel sole. Grazie a questo si riescono quindi ad ottenere aree di passaggio da superficie illuminata a superficie in ombra più morbide.
+
+Viene poi inizializzato il pannello di controllo interattivo tramite dat.GUI, che permette all'utente di modificare in tempo reale i parametri orbitali e il corpo celeste seguito dalla camera. Attraverso slider, menu a tendina e checkbox, l’utente può intervenire in tempo reale sui principali parametri orbitali dei pianeti, come velocità angolare, distanza dal Sole e inclinazione dell’orbita. Ogni modifica aggiorna immediatamente la scena. Il pannello gestisce inoltre il controllo della camera virtuale. Tramite un selettore è possibile scegliere quale corpo celeste seguire dinamicamente: la camera aggiorna quindi la propria posizione rispetto al pianeta selezionato, mantenendolo al centro della scena durante il moto orbitale. In questo modo l’utente può passare rapidamente da una visuale globale del sistema solare a una prospettiva ravvicinata di un singolo pianeta.
+
+
+<h3>2. COMPILAZIONE PROGRAMMI SHADER</h3>
+
+Una volta che la pagina è caricata, main.js acquisisce il contesto WebGL dal canvas e compila tre programmi shader distinti:
+- sphere per i pianeti, con illuminazione Phong multi-campione
+- emissive per il Sole, che non riceve ombreggiatura
+- skybox per lo sfondo cubemap della Via Lattea
+
+La compilazione avviene leggendo il codice GLSL direttamente dagli script inline presenti nel DOM tramite le funzioni compileShaderSrc e createProgramFromIds.
+
+La funzione compileShaderSrc si occupa della compilazione di un singolo shader. Riceve come parametri il contesto WebGL, il codice sorgente GLSL e il tipo di shader (VERTEX_SHADER oppure FRAGMENT_SHADER). Internamente:
+a. crea un oggetto shader tramite gl.createShader()
+b. associa il codice sorgente GLSL con gl.shaderSource()
+c. avvia la compilazione mediante gl.compileShader()
+
+La funzione createProgramFromIds opera invece a un livello superiore e costruisce un intero programma GPU partendo dagli identificatori degli script HTML che contengono gli shader. La funzione:
+a. recupera dal DOM gli script contenenti vertex e fragment shader
+b. estrae il testo GLSL tramite textContent
+c. richiama compileShaderSrc per compilare entrambi gli shader
+d. crea un programma WebGL con gl.createProgram()
+e. collega gli shader tramite gl.attachShader()
+f. effettua il linking con gl.linkProgram()
+
+Dopo la creazione dei programmi shader, main.js recupera tutte le location di attributi e uniform necessari tramite funzioni come gl.getAttribLocation() e gl.getUniformLocation(). Gli attributi identificano dati per-vertice caricati nei buffer GPU, come posizione, normali e coordinate UV, mentre le uniform rappresentano variabili costanti durante il draw call, ad esempio matrici di trasformazione, posizione della camera, proprietà dei materiali e parametri dell’illuminazione.
+
+Per il programma sphere, vengono recuperate uniform relative alle matrici model, view e projection, oltre ai vettori che rappresentano i campioni luminosi distribuiti sulla superficie del Sole tramite Fibonacci sampling. Il programma emissive utilizza invece un set ridotto di uniform, poiché il Sole viene renderizzato come sorgente autoilluminata senza calcolo di riflessione diffusa o speculare. Infine, il programma skybox richiede principalmente la cubemap texture e la matrice di vista privata della componente traslazionale, così da mantenere lo sfondo apparentemente infinito durante il movimento della camera.
+
+<h3>3. CARICAMENTO MESH</h3>
+
+Prima di avviare il loop di rendering, il programma carica in modo asincrono le mesh 3D di tutti gli undici corpi celesti (Sole, otto pianeti, Luna e anelli di Saturno). Per ciascuno, la funzione buildMeshGPU coordina l’intera pipeline di caricamento e preparazione delle risorse grafiche, utilizzando le utility definite nel modulo load2_mesh.js, responsabile della gestione dei modelli OBJ/MTL.
+
+Il file OBJ viene richiesto via fetch e parsato tramite glmReadOBJ, funzione fornita da glm_utils.js. Questa funzione interpreta la struttura testuale del file .obj, estraendo vertici, normali e coordinate UV e organizzandoli in strutture dati.
+
+Se è presente un file MTL associato, questo viene caricato tramite readMTLFile e successivamente parsato con glmReadMTL, che analizza i materiali definiti nel file .mtl. In particolare vengono recuperati i riferimenti alle texture diffuse (map_Kd) e speculari (map_Ks), utilizzate successivamente dagli shader per il calcolo dell’illuminazione e delle riflessioni superficiali.
+
+Una volta completato il parsing, la mesh viene normalizzata attraverso la funzione Unitize, anch’essa implementata in load2_mesh.js. Questa operazione ridimensiona e centra il modello all’interno di un cubo unitario, rendendo coerente la scala dei diversi corpi celesti indipendentemente dalle dimensioni originali dei file OBJ. Le diverse dimensioni dei corpi celesti saranno poi scelte in una fase successiva.
+
+In seguito i dati dei triangoli vengono convertiti in array lineari continui contenenti posizioni, normali e coordinate texture. Gli array ottenuti vengono quindi caricati sulla GPU tramite la funzione makeBuffer, che crea e inizializza i buffer WebGL mediante gl.createBuffer, gl.bindBuffer e gl.bufferData.
+
+
+<h3>4. RENDERING</h3>
+
+Il loop di rendering è scandito da requestAnimationFrame, che sincronizza l’aggiornamento della scena con il refresh rate del browser garantendo animazioni fluide ed efficienti. A ogni frame viene ricalcolata la matrice di proiezione prospettica in funzione dell’aspect ratio corrente del canvas, così da mantenere proporzioni corrette anche in caso di ridimensionamento della finestra.
+
+Le posizioni di tutti i corpi vengono aggiornate chiamando computeOrbit, che calcola la posizione 3D su un'orbita circolare inclinata nello spazio. L’orbita viene parametrizzata utilizzando il tempo corrente e la velocità angolare definita in config.js. Per un’orbita circolare nel piano XZ, la posizione base viene ottenuta mediante funzioni trigonometriche:
+
+x=rcos(ωt),z=rsin(ωt)
+
+dove:
+r rappresenta il raggio orbitale;
+ω la velocità angolare;
+t il tempo trascorso dall’avvio della simulazione.
+
+Per simulare l’inclinazione orbitale dei pianeti, il vettore posizione ottenuto viene successivamente trasformato tramite una rotazione attorno all’asse X. L’inclinazione viene applicata mediante una matrice di rotazione.
+
+Per ottenere una rotazione della Luna fisicamente corretta (ovvero che mostri sempre la stessa faccia rivolta verso la terra) si utilizza la posizione della Terra come centro dell'orbita. Questo comportamento si ottiene sincronizzando la velocità di rotazione della Luna attorno al proprio asse con la velocità della sua rivoluzione attorno alla Terra. In pratica, mentre la Luna percorre la propria orbita, viene applicata una rotazione interna dello stesso angolo orbitale, così che l’orientamento relativo rispetto alla Terra rimanga costante.
+
+w = m4.multiply(w, m4.yRotation(-orbitAngle - Math.PI));
+
+a. -orbitAngle: sincronizza la rotazione della Luna con la sua orbita (tidal locking), così ruota su sé stessa mentre gira attorno alla Terra e mantiene la stessa faccia rivolta verso di essa.
+b. -Math.PI: corregge l’orientamento iniziale del modello 3D, perché la mesh della Luna è ruotata di 180° rispetto alla direzione attesa.
+
+La camera viene aggiornata in base al corpo selezionato dall'utente e al vettore di pan accumulato.
+
+Il rendering avviene nell'ordine: prima lo skybox (con il test di profondità impostato a LEQUAL per posizionarlo sempre dietro tutto il resto), poi il Sole con lo shader emissivo, infine ogni pianeta con drawPlanet, che costruisce la matrice world combinando traslazione, inclinazione assiale, rotazione propria e scala prima di inviare la draw call a WebGL.
+
+La Terra dispone inoltre di tre texture intercambiabili (normale, desertica, glaciale) selezionate dinamicamente in base alla sua distanza dal Sole, aggiornata ogni frame da updateEarthTextureByDistance.
+
+
+<h3>5. FUNZIONAMENTO DEGLI SHADER</h3>
+
+Il sistema di rendering si basa su tre programmi shader scritti in GLSL: sphere, emissive e skybox. Gli shader rappresentano la parte del codice eseguita direttamente sulla GPU e determinano come ogni pixel e vertice viene trasformato e colorato.
+
+Lo shader sphere utilizza un modello di illuminazione di tipo Phong semplificato. Il vertex shader si occupa di trasformare i vertici della mesh applicando le matrici model, view e projection, portando gli oggetti dallo spazio locale allo spazio schermo. Inoltre calcola e passa al fragment shader normali e coordinate necessarie per il calcolo della luce. Il fragment shader combina illuminazione diffusa e speculare utilizzando la posizione del Sole e i campioni luminosi generati con Fibonacci sampling, ottenendo un effetto di luce distribuita più morbido rispetto a una singola sorgente.
+
+Lo shader emissive viene utilizzato esclusivamente per il Sole. In questo caso non viene applicato alcun modello di illuminazione: il fragment shader restituisce direttamente il colore della texture o un valore emissivo costante. Questo permette al Sole di apparire come una sorgente di luce autonoma, indipendente da ombre o riflessioni.
+
+Lo shader skybox gestisce invece lo sfondo della scena. Il vertex shader mantiene la cubemap sempre centrata sulla camera, eliminando la componente di traslazione della vista per evitare che lo sfondo si muova con gli oggetti. Il fragment shader campiona la texture cubemap per ricreare l’immagine della Via Lattea attorno all’intera scena, dando l’illusione di uno spazio infinito.
+
+In generale, gli shader ricevono dal programma principale tutte le informazioni necessarie tramite uniform, come matrici di trasformazione, posizione della camera e parametri di illuminazione, e restituiscono il colore finale di ogni frammento. Questo permette di eseguire la maggior parte dei calcoli grafici direttamente sulla GPU, mantenendo il rendering fluido anche con più oggetti in movimento simultaneo.
+</div>
+
+</body>
+</html>
