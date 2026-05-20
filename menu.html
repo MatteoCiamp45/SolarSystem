@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Controlli — Solar System (WebGL)</title>
+    <link rel="icon" href="/resources/images/favicon.png" type="image/png">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+
+        body{
+            background:#08101e;
+            color:#c8dff0;
+            font-family:system-ui,sans-serif;
+            padding:40px 20px;
+        }
+
+        .container{max-width:560px;margin:auto}
+
+        header{margin-bottom:30px}
+        header h1{
+            font-size:11px;
+            text-transform:uppercase;
+            color:#4a90d9;
+        }
+        header p{
+            font-size:22px;
+            color:#e8f4ff;
+        }
+        header hr{
+            margin-top:12px;
+            border:0;
+            border-top:1px solid rgba(74,144,217,.3);
+        }
+
+        .section-label{
+            font-size:10px;
+            text-transform:uppercase;
+            color:rgba(74,144,217,.6);
+            margin:25px 0 10px;
+        }
+
+        .row{
+            display:flex;
+            gap:15px;
+            padding:12px 0;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        .icon-wrap{width:72px;height:72px}
+        canvas{width:100%;height:100%}
+
+        .action{color:#e8f4ff}
+        .desc{font-size:13px;color:#7a9ab8}
+
+        footer{
+            margin-top:40px;
+            font-size:11px;
+            text-align:center;
+            color:rgba(74,144,217,.4);
+        }
+
+        #escBtn{
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+
+            padding: 10px 16px;
+            background: rgba(20,40,70,0.8);
+            color: #e8f4ff;
+            border: 1px solid rgba(74,144,217,.4);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: .1em;
+        }
+        #escBtn:hover{
+            background: rgba(74,144,217,.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <h1>Solar System WebGL</h1>
+            <p>Guida ai controlli</p>
+            <hr/>
+        </header>
+
+        <div class="section-label">Mouse</div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon1"></canvas></div>
+        <div class="info">
+            <div class="action">Tasto sinistro + trascina</div>
+            <div class="desc">Rotazione camera.</div>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon2"></canvas></div>
+        <div class="info">
+            <div class="action">Tasto destro + trascina</div>
+            <div class="desc">Pan camera.</div>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon3"></canvas></div>
+        <div class="info">
+            <div class="action">Rotella</div>
+            <div class="desc">Zoom.</div>
+        </div>
+        </div>
+
+        <div class="section-label">Pad / Touchpad</div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon4"></canvas></div>
+        <div>
+            <div class="action">Clic sinistro + trascina</div>
+            <div class="desc">Rotazione camera.</div>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon5"></canvas></div>
+        <div>
+            <div class="action">Clic destro + trascina</div>
+            <div class="desc">Pan camera.</div>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="icon-wrap"><canvas id="icon6"></canvas></div>
+        <div>
+            <div class="action">Due dita</div>
+            <div class="desc">Zoom.</div>
+        </div>
+        </div>
+
+    </div>
+
+    <script>
+        const vertexShaderSrc = `
+        attribute vec2 a_position;
+        uniform vec2 u_resolution;
+        void main(){
+        vec2 zeroToOne = a_position / u_resolution;
+        vec2 zeroToTwo = zeroToOne * 2.0;
+        vec2 clip = zeroToTwo - 1.0;
+        gl_Position = vec4(clip * vec2(1,-1),0,1);
+        }
+        `;
+
+        const fragmentShaderSrc = `
+        precision mediump float;
+        uniform vec4 u_color;
+        void main(){
+        gl_FragColor = u_color;
+        }
+        `;
+
+        function createProgram(gl, vsSrc, fsSrc){
+            function compile(type,src){
+                let s=gl.createShader(type);
+                gl.shaderSource(s,src);
+                gl.compileShader(s);
+                return s;
+            }
+            let vs=compile(gl.VERTEX_SHADER,vsSrc);
+            let fs=compile(gl.FRAGMENT_SHADER,fsSrc);
+            let p=gl.createProgram();
+            gl.attachShader(p,vs);
+            gl.attachShader(p,fs);
+            gl.linkProgram(p);
+            return p;
+        }
+
+        function drawRect(gl, program, x,y,w,h,color){
+            let pos = [
+                x,y, x+w,y, x,y+h,
+                x,y+h, x+w,y, x+w,y+h
+            ];
+            let buffer=gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+            gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);
+
+            let loc=gl.getAttribLocation(program,"a_position");
+            gl.enableVertexAttribArray(loc);
+            gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+
+            gl.uniform2f(gl.getUniformLocation(program,"u_resolution"),gl.canvas.width,gl.canvas.height);
+            gl.uniform4fv(gl.getUniformLocation(program,"u_color"),color);
+
+            gl.drawArrays(gl.TRIANGLES,0,6);
+        }
+
+        // Corpo mouse
+        function drawMouseBase(gl,p){
+            // corpo
+            drawRect(gl,p,16,10,40,52,[0.1,0.2,0.3,0.8]);
+
+            // linea centrale
+            drawRect(gl,p,35,10,2,30,[0.3,0.4,0.5,1.0]);
+
+            // rotella base
+            drawRect(gl,p,31,18,10,14,[0.2,0.3,0.4,1.0]);
+        }
+
+        // Icona sinistro
+        function iconLeft(gl,p){
+            drawMouseBase(gl,p);
+            drawRect(gl,p,16,10,20,30,[0.2,0.5,1,0.5]); // sinistro
+        }
+
+        // Icona destro
+        function iconRight(gl,p){
+            drawMouseBase(gl,p);
+            drawRect(gl,p,36,10,20,30,[1,0.5,0,0.5]); // destro
+        }
+
+        // Icona rotella
+        function iconWheel(gl,p){
+            drawMouseBase(gl,p);
+            drawRect(gl,p,31,18,10,14,[0,1,0.4,0.6]); // rotella evidenziata
+        }
+
+        // base touchpad
+        function drawPadBase(gl,p){
+            drawRect(gl,p,10,15,52,40,[0.1,0.2,0.3,0.6]); // superficie
+        }
+
+        // dito singolo
+        function iconPadLeft(gl,p){
+            drawPadBase(gl,p);
+            drawRect(gl,p,30,22,8,8,[0.2,0.5,1,0.6]); // dito
+            drawRect(gl,p,11,44,23,10,[0.2,0.5,1,0.6]);
+        }
+
+        // pan (destro)
+        function iconPadRight(gl,p){
+            drawPadBase(gl,p);
+            drawRect(gl,p,30,22,8,8,[1,0.5,0,0.6]); // dito
+            drawRect(gl,p,38,44,23,10,[1,0.5,0,0.7]);
+        }
+
+        // pinch zoom
+        function iconPadZoom(gl,p){
+            drawPadBase(gl,p);
+            drawRect(gl,p,20,22,8,8,[0,1,0.4,0.6]);
+            drawRect(gl,p,40,22,8,8,[0,1,0.4,0.6]);
+        }
+
+        function initIcon(canvasId, drawFn){
+            let canvas=document.getElementById(canvasId);
+            canvas.width=72;
+            canvas.height=72;
+
+            let gl=canvas.getContext("webgl");
+            let program=createProgram(gl,vertexShaderSrc,fragmentShaderSrc);
+
+            gl.useProgram(program);
+            gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+            gl.clearColor(0,0,0,0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            drawFn(gl,program);
+        }
+
+        // init
+        initIcon("icon1",iconLeft);
+        initIcon("icon2",iconRight);
+        initIcon("icon3",iconWheel);
+        initIcon("icon4",iconPadLeft);
+        initIcon("icon5",iconPadRight);
+        initIcon("icon6",iconPadZoom);
+    </script>
+
+    <button id="escBtn" onclick="esciMenu()">ESC</button>
+
+    <script>
+    function esciMenu(){
+        window.location.href = "solar_system.html";
+    }
+    </script>
+
+</body>
+</html>
