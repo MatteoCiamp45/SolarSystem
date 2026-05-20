@@ -56,9 +56,7 @@
   <span>CARICAMENTO...</span>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       VERTEX SHADER — Pianeti (area light + texture)
-  ═══════════════════════════════════════════════ -->
+  <!-- VERTEX SHADER — Pianeti (area light + texture) -->
   <script id="vs-sphere" type="x-shader/x-vertex">
     attribute vec3 a_position;          // posizione vertice nello spazio locale (x, y, z)
     attribute vec3 a_normal;            // normale vertice nello spazio locale (x, y, z)
@@ -94,9 +92,7 @@
     }
   </script>
 
-  <!-- ═══════════════════════════════════════════════
-       FRAGMENT SHADER — Pianeti (area light + texture)
-  ═══════════════════════════════════════════════ -->
+  <!-- FRAGMENT SHADER — Pianeti (area light + texture) -->
   <script id="fs-sphere" type="x-shader/x-fragment">
     precision mediump float;
 
@@ -180,9 +176,7 @@
     }
   </script>
 
-  <!-- ═══════════════════════════════════════════════
-       VERTEX SHADER — Sole emissivo (con texture)
-  ═══════════════════════════════════════════════ -->
+  <!-- VERTEX SHADER — Sole emissivo (con texture) -->
   <script id="vs-emissive" type="x-shader/x-vertex">
     attribute vec3 a_position;
     attribute vec2 a_uv;
@@ -199,9 +193,7 @@
     }
   </script>
 
-  <!-- ═══════════════════════════════════════════════
-       FRAGMENT SHADER — Sole emissivo (con texture)
-  ═══════════════════════════════════════════════ -->
+  <!-- FRAGMENT SHADER — Sole emissivo (con texture) -->
   <script id="fs-emissive" type="x-shader/x-fragment">
     precision mediump float;
 
@@ -221,9 +213,7 @@
     }
   </script>
 
-  <!-- ═══════════════════════════════════════════════
-       VERTEX SHADER — Skybox
-  ═══════════════════════════════════════════════ -->
+  <!-- VERTEX SHADER — Skybox -->
   <script id="vs-skybox" type="x-shader/x-vertex">
     attribute vec3 a_position;
     uniform mat4 u_projection;
@@ -237,9 +227,7 @@
     }
   </script>
 
-  <!-- ═══════════════════════════════════════════════
-       FRAGMENT SHADER — Skybox
-  ═══════════════════════════════════════════════ -->
+  <!-- FRAGMENT SHADER — Skybox -->
   <script id="fs-skybox" type="x-shader/x-fragment">
     precision mediump float;
     uniform samplerCube u_skybox;
