@@ -73,7 +73,7 @@ var settings = new function () {
 */
 function fibonacciSpherePoints(n, r) {
   const pts = [];
-  const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // angolo aureo per distribuire i punti in modo uniforme
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // angolo aureo per distribuire i punti in modo uniforme (circa 137.5°)
   for (let i = 0; i < n; i++) {
     const y   = 1 - (i / (n - 1)) * 2;              // divide la sfera in "fasce" orizzontali uniformi
     const rAt = Math.sqrt(1 - y * y);               // raggio del cerchio alla latitudine y
