@@ -70,6 +70,8 @@ var settings = new function () {
 /******************** DISTRIBUZIONE DI FIBONACCI sulla sfera
    Distribuisco in modo uniforme i campioni di luce sulla superficie del sole
    in modo da ottenere un'illuminazione più realistica. Le ombre ottenute saranno più morbide e dettagliate.
+   Tramite il raggio Light_SPHERE_RADIUS posso controllare la distanza dei campioni dalla superficie del sole,
+   influenzando l'effetto di attenuazione e la morbidezza delle ombre.
 */
 function fibonacciSpherePoints(n, r) {
   const pts = [];
