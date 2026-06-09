@@ -128,6 +128,12 @@
 
       /* Contributo di tutti i campioni sulla superficie */
       for (int i = 0; i < NUM_SAMPLES; i++) {
+
+        // culling dei samples occlusi dal sole ---
+        vec3 toSample = u_lightSamples[i];                                      // il sole è all'origine: sample - vec3(0) = sample
+        vec3 toPlanet = v_worldPos;                                             // idem per il pianeta
+        if (dot(toSample, toPlanet) < 0.0) continue;                            // sample sul lato opposto del sole
+
         vec3  toLight  = u_lightSamples[i] - v_worldPos;                        // vettore verso il campione di luce
         float dist     = length(toLight);
         vec3  lightDir = toLight / dist;                                        // direzione normalizzata
