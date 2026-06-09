@@ -129,21 +129,24 @@
       /* Contributo di tutti i campioni sulla superficie */
       for (int i = 0; i < NUM_SAMPLES; i++) {
 
-        // culling dei samples occlusi dal sole ---
-        vec3 toSample = u_lightSamples[i];                                      // il sole è all'origine: sample - vec3(0) = sample
-        vec3 toPlanet = v_worldPos;                                             // idem per il pianeta
-        if (dot(toSample, toPlanet) < 0.0) continue;                            // sample sul lato opposto del sole
+        // peso: 0 se il sample è sul bordo/lato opposto, 1 se è frontale
+        vec3  toSample   = normalize(u_lightSamples[i]);
+        vec3  toPlanet   = normalize(v_worldPos);
+        float cosAngle   = dot(toSample, toPlanet);
+        float weight     = clamp(cosAngle, 0.0, 1.0);  // lineare: 0 al bordo, 1 al centro
 
+        if (weight <= 0.0) continue;
+        
         vec3  toLight  = u_lightSamples[i] - v_worldPos;                        // vettore verso il campione di luce
         float dist     = length(toLight);
         vec3  lightDir = toLight / dist;                                        // direzione normalizzata
 
         //float atten = 2.0 / (1.0 + 0.005 * dist + 0.004 * dist * dist);
-        float atten = 1.0 / (1.0 + 0.0001 * dist);                              // attenuazione in base alla distanza (più leggera per i campioni vicini, più forte per quelli lontani)
+        float atten = 3.0 / (1.0 + 0.0001 * dist);                              // attenuazione in base alla distanza (più leggera per i campioni vicini, più forte per quelli lontani)
 
         /* Diffuse */
         float diff = max(dot(normal, lightDir), 0.0);                           // fattore di diffusione (0 se luce dietro la superficie)
-        color += diff * baseColor * atten / float(NUM_SAMPLES);                 // 2) contributo luce diffusa
+        color += diff * baseColor * atten * weight / float(NUM_SAMPLES);        // 2) contributo luce diffusa
 
       }
 

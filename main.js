@@ -417,11 +417,8 @@ window.addEventListener('load', () => {
 
     bindOBJAttribs(mesh, sph.aPos, sph.aNorm, sph.aUV);
 
-    let w = m4.translation(
-        position[0],
-        position[1],
-        position[2]
-    );
+    let w = m4.identity();
+    w = m4.multiply(w, m4.translation(position[0], position[1], position[2]));
 
     // inclinazione asse
     w = m4.multiply(w, m4.zRotation(tilt));
@@ -434,7 +431,7 @@ window.addEventListener('load', () => {
     }
 
     // scala
-    w = m4.scale(w, scale, scale, scale);
+    w = m4.multiply(w, m4.scaling(scale, scale, scale));
 
     gl.uniformMatrix4fv(sph.uWorld, false, w);
 
