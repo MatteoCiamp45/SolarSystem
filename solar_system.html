@@ -142,7 +142,7 @@
         vec3  lightDir = toLight / dist;                                        // direzione normalizzata
 
         //float atten = 2.0 / (1.0 + 0.005 * dist + 0.004 * dist * dist);
-        float atten = 3.0 / (1.0 + 0.0001 * dist);                              // attenuazione in base alla distanza (più leggera per i campioni vicini, più forte per quelli lontani)
+        float atten = 3.5 / (1.0 + 0.0001 * dist);                              // attenuazione in base alla distanza (più leggera per i campioni vicini, più forte per quelli lontani)
 
         /* Diffuse */
         float diff = max(dot(normal, lightDir), 0.0);                           // fattore di diffusione (0 se luce dietro la superficie)
