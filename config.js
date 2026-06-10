@@ -6,12 +6,12 @@
 'use strict';
 
 var SKYBOX_FACES = [
-  { target: 'TEXTURE_CUBE_MAP_POSITIVE_X', url: '/resources/images/milky-way/px.jpg' },
-  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_X', url: '/resources/images/milky-way/nx.jpg' },
-  { target: 'TEXTURE_CUBE_MAP_POSITIVE_Y', url: '/resources/images/milky-way/py.jpg' },
-  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_Y', url: '/resources/images/milky-way/ny.jpg' },
-  { target: 'TEXTURE_CUBE_MAP_POSITIVE_Z', url: '/resources/images/milky-way/pz.jpg' },
-  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_Z', url: '/resources/images/milky-way/nz.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_POSITIVE_X', url: 'resources/images/milky-way/px.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_X', url: 'resources/images/milky-way/nx.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_POSITIVE_Y', url: 'resources/images/milky-way/py.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_Y', url: 'resources/images/milky-way/ny.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_POSITIVE_Z', url: 'resources/images/milky-way/pz.jpg' },
+  { target: 'TEXTURE_CUBE_MAP_NEGATIVE_Z', url: 'resources/images/milky-way/nz.jpg' },
 ];
 
 var LIGHT_SPHERE_RADIUS = 1.0;

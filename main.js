@@ -336,22 +336,22 @@ window.addEventListener('load', () => {
   // Caricamento asincrono delle mesh OBJ prima di iniziare il rendering
   (async () => {
     try {
-      meshSun   = await buildMeshGPU(gl, '/resources/objects/sun/sun.obj');
-      meshEarth = await buildMeshGPU(gl, '/resources/objects/earth2/earth2.obj');
+      meshSun   = await buildMeshGPU(gl, 'resources/objects/sun/sun.obj');
+      meshEarth = await buildMeshGPU(gl, 'resources/objects/earth2/earth2.obj');
       meshEarth._textures = {
-        hot:    loadTexture(gl, '/resources/objects/earth2/', 'earth_hot1.jpg'),
+        hot:    loadTexture(gl, 'resources/objects/earth2/', 'earth_hot1.jpg'),
         normal: meshEarth.texture,
-        ice:    loadTexture(gl, '/resources/objects/earth2/', 'earth_ice1.jpg')
+        ice:    loadTexture(gl, 'resources/objects/earth2/', 'earth_ice1.jpg')
       };
-      meshMoon    = await buildMeshGPU(gl, '/resources/objects/moon/moon.obj');
-      meshMercury = await buildMeshGPU(gl, '/resources/objects/mercury/mercury.obj');
-      meshVenus   = await buildMeshGPU(gl, '/resources/objects/venus/venus.obj');
-      meshMars    = await buildMeshGPU(gl, '/resources/objects/mars/mars.obj');
-      meshJupiter = await buildMeshGPU(gl, '/resources/objects/jupiter/jupiter.obj');
-      meshSaturn  = await buildMeshGPU(gl, '/resources/objects/saturn3/saturn.obj');
-      meshRings   = await buildMeshGPU(gl, '/resources/objects/rings/rings.obj');
-      meshUranus  = await buildMeshGPU(gl, '/resources/objects/uranus/uranus.obj');
-      meshNeptune = await buildMeshGPU(gl, '/resources/objects/neptune/neptune.obj');
+      meshMoon    = await buildMeshGPU(gl, 'resources/objects/moon/moon.obj');
+      meshMercury = await buildMeshGPU(gl, 'resources/objects/mercury/mercury.obj');
+      meshVenus   = await buildMeshGPU(gl, 'resources/objects/venus/venus.obj');
+      meshMars    = await buildMeshGPU(gl, 'resources/objects/mars/mars.obj');
+      meshJupiter = await buildMeshGPU(gl, 'resources/objects/jupiter/jupiter.obj');
+      meshSaturn  = await buildMeshGPU(gl, 'resources/objects/saturn3/saturn.obj');
+      meshRings   = await buildMeshGPU(gl, 'resources/objects/rings/rings.obj');
+      meshUranus  = await buildMeshGPU(gl, 'resources/objects/uranus/uranus.obj');
+      meshNeptune = await buildMeshGPU(gl, 'resources/objects/neptune/neptune.obj');
       console.log('Tutte le mesh caricate.');
     } catch (err) {
       console.error('Errore nel caricamento delle mesh:', err);
