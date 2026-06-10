@@ -145,7 +145,7 @@
         float atten = 3.5 / (1.0 + 0.0001 * dist);                              // attenuazione in base alla distanza (più leggera per i campioni vicini, più forte per quelli lontani)
 
         /* Diffuse */
-        float diff = max(dot(normal, lightDir), 0.0);                           // fattore di diffusione (0 se luce dietro la superficie)
+        float diff = max(dot(normal, lightDir), 0.0);                           // fattore di diffusione (0 se luce dietro la superficie), determina quali punti del pianeta sono illuminati
         color += diff * baseColor * atten * weight / float(NUM_SAMPLES);        // 2) contributo luce diffusa
 
       }
@@ -163,20 +163,15 @@
       /* Highlight più largo vicino al Sole */
       float dynamicShininess = u_shininess * clamp(dist / 25.0, 0.15, 1.0);
 
-      /* halfway vector */
-      vec3 hv = normalize(mainLightDir + surfaceToViewDir);
-
-      //float spec = pow(
-      //    max(dot(normal, hv), 0.0),
-      //    dynamicShininess
-      //);
+      // vettore di riflessione della luce sulla normale
+      vec3 R = reflect(-mainLightDir, normal);
 
       float spec = 0.0;
       if (dynamicShininess > 0.0) {
-        spec = pow(
-            max(dot(normal, hv), 0.0),
-            dynamicShininess
-        );
+          spec = pow(
+              max(dot(R, surfaceToViewDir), 0.0),  // angolo tra riflessione e camera
+              dynamicShininess
+          );
       }
 
       // 3) contributo luce speculare
