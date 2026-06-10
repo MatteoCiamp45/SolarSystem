@@ -163,6 +163,16 @@
       /* Highlight più largo vicino al Sole */
       float dynamicShininess = u_shininess * clamp(dist / 25.0, 0.15, 1.0);
 
+      /* halfway vector */
+      //vec3 hv = normalize(mainLightDir + surfaceToViewDir);
+      //float spec = 0.0;
+      //if (dynamicShininess > 0.0) {
+      //  spec = pow(
+      //      max(dot(normal, hv), 0.0),
+      //      dynamicShininess
+      //  );
+      //}
+
       // vettore di riflessione della luce sulla normale
       vec3 R = reflect(-mainLightDir, normal);
 
