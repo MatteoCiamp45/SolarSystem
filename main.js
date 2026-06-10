@@ -583,7 +583,7 @@ window.addEventListener('load', () => {
       gl.useProgram(emissiveProg);
       bindOBJAttribs(meshSun, emi.aPos, -1, emi.aUV);               // la sfera emissiva non ha normali (non serve per il calcolo dell'illuminazione)
       gl.uniformMatrix4fv(emi.uProj,  false, projectionMatrix);
-      gl.uniformMatrix4fv(emi.uView,  false, viewMatrix);
+      gl.uniformMatrix4fv(emi.uView,  false, viewMatrix);           // adatta il mondo circostante alla vista della camera (se la camera si sposta a destra, in realtà stiamo spostando tutto il mondo a sinistra)
       gl.uniformMatrix4fv(emi.uWorld, false, m4.scale(m4.identity(), 3, 3, 3));
       gl.uniform3fv(emi.uColor, [1.0, 1.0, 1.0]);
       gl.activeTexture(gl.TEXTURE0);
